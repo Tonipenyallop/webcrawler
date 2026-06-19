@@ -1,5 +1,4 @@
 from urllib.parse import urljoin, urlsplit, urlunsplit
-import re
 
 
 def normalize_url(url: str, base: str | None = None) -> str:
