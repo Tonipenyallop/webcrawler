@@ -10,16 +10,16 @@ class Frontier:
     seen_key = 'seen'
     queue_key = 'frontier'
 
-    async def add(self, url: str, val: int) -> bool:
+    async def add(self, url: str, depth: int) -> bool:
         seen = await self.redis_client.sadd(self.seen_key, url) == 0
         if seen:
             return False
 
-        await self.redis_client.rpush(self.queue_key, json.dumps([url, val]))
+        await self.redis_client.rpush(self.queue_key, json.dumps([url, depth]))
 
         return True
 
-    async def pop(self) -> tuple[str, int]:
+    async def pop(self) -> tuple[str, int] | None:
         popped = await self.redis_client.lpop(name=self.queue_key)
 
         if popped == None:
