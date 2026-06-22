@@ -26,3 +26,5 @@
 - "Pool" = a connection pool: a managed set of ready-to-use database connections that get reused instead of opening a new one for every query.
 - leaking -> pool.fetchval to prevent
 - "executemany"
+- worker saves all the pages for verifying which page was visited
+- worker only parse for html content for next queue
