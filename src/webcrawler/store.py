@@ -27,3 +27,8 @@ class Store:
         """
 
         await self.pool.executemany(query, [(id, link) for link in links])
+
+    @classmethod
+    async def connect(cls, db_dsn: str):
+        pool = await asyncpg.create_pool(db_dsn)
+        return cls(pool)
