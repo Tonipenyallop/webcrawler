@@ -15,6 +15,16 @@ async def redis_client():
     await client.aclose()
 
 
+@pytest.fixture
+def db_dsn():
+    """The Postgres DSN string. Skips the test if WEBCRAWLER_DB_URL isn't set."""
+    dsn = os.environ.get("WEBCRAWLER_DB_URL")
+    if not dsn:
+        pytest.skip(
+            "WEBCRAWLER_DB_URL not set; start Postgres + export WEBCRAWLER_DB_URL to run")
+    return dsn
+
+
 @pytest_asyncio.fixture
 async def pg_pool():
     """A real Postgres pool. Skips the test if WEBCRAWLER_DB_URL isn't set (no DB running)."""
