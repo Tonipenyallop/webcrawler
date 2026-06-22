@@ -21,33 +21,45 @@ class Worker:
     async def run(self):
         count = self.config.max_pages
         while count > 0:
-            popped = await self.frontier.pop()
-            if popped == None:
+            is_ran = await self.run_once()
+            if not is_ran:
                 break
+            count -= 1
 
-            url = popped[0]
-            depth = popped[1]
+    async def run_once(self) -> bool:
+        """
+            true -> I have worked
+            false -> I have not worked(frontier was empty)
+        """
 
-            try:
-                res = await self.fetcher.fetch(url=url)
+        popped = await self.frontier.pop()
+        if popped == None:
+            return False
 
-                # check visited
-                pid = await self.store.save_page(url=url, status=res.status, content_type=res.content_type)
-                # also checks the max page(always checking the visited number)
-                count -= 1
+        url = popped[0]
+        depth = popped[1]
 
-                if res.content_type == HTML_CONTENT_TYPE:
-                    # only for html contents can have href
-                    links = self.parser.extract_links(res.final_url, res.body)
-                    await self.store.save_links(pid, links)
+        try:
+            res = await self.fetcher.fetch(url=url)
 
-                    for link in links:
-                        if not self.config.is_allowed(link):
-                            continue
-                        if depth + 1 > self.config.max_depth:
-                            continue
+            # check visited
+            pid = await self.store.save_page(url=url, status=res.status, content_type=res.content_type)
 
-                        await self.frontier.add(link, depth + 1)
+            if res.content_type == HTML_CONTENT_TYPE:
+                # only for html contents can have href
+                links = self.parser.extract_links(res.final_url, res.body)
+                await self.store.save_links(pid, links)
 
-            except:
-                logging.exception(f"failed to fetch data with url:{url}")
+                for link in links:
+                    if not self.config.is_allowed(link):
+                        continue
+                    if depth + 1 > self.config.max_depth:
+                        continue
+
+                    await self.frontier.add(link, depth + 1)
+
+            return True
+
+        except Exception:
+            logging.exception(f"failed to fetch data with url:{url}")
+            return True
