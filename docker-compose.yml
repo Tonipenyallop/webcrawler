@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:18.4-alpine
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    volumes:
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:8.8-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  worker:
+    build: .
+    restart: always
+    depends_on:
+      - "db"
+      - "redis"
+    environment:
+      WEBCRAWLER_DB_URL: ${WEBCRAWLER_DB_URL}
+      WEBCRAWLER_REDIS_URL: ${WEBCRAWLER_REDIS_URL}
+      WEBCRAWLER_ALLOWED_DOMAINS: ${WEBCRAWLER_ALLOWED_DOMAINS}
+      WEBCRAWLER_MAX_DEPTH: ${WEBCRAWLER_MAX_DEPTH}
+
+  seeder:
+    build: .
+    restart: "no"
+    depends_on:
+      - "redis"
+    environment:
+      WEBCRAWLER_REDIS_URL: ${WEBCRAWLER_REDIS_URL}
+      WEBCRAWLER_DB_URL: ${WEBCRAWLER_DB_URL}
+    command: uv run python3 -m webcrawler.seeder ${SEEDS:-https://example.com}
+
+  fixture-site:
+    build: .
+    restart: "always"
+    working_dir: /bigsite
+    volumes:
+      - ./tests/fixtures/bigsite:/bigsite:ro
+    command: uv run python3 -m http.server 80
