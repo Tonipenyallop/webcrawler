@@ -18,7 +18,7 @@ def main() -> None:
     # 1+ positional URLs → args.seeds is a list[str]
     parser.add_argument("seeds", nargs="+")
     parser.add_argument(
-        "--redis-url", default=os.environ.get('REDIS_URL', "redis://localhost:6379"))
+        "--redis-url", default=os.environ.get('WEBCRAWLER_REDIS_URL', "redis://localhost:6379"))
 
     args = parser.parse_args()
 
