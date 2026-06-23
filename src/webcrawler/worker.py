@@ -18,6 +18,7 @@ class Worker:
     store: Store
     config: CrawlConfig
 
+    # for testing
     async def run(self):
         count = self.config.max_pages
         while count > 0:
