@@ -61,12 +61,50 @@
 - @dataclass
   - field: default -> value, default_factory -> function(zero arg callable)
 - lambda -> anonymous method
+- python3 "-m": stands for "module" -> "Look inside your own paths"
+  - Rule of thumb: -m → dotted module path, no extension (webcrawler.worker_main); only when you run a file directly do you use the path with .py (python src/webcrawler/worker_main.py). The -m form is what you want here because it sets up the package imports correctly.
+- frozenset("RAND_STR".split()) --> 1.split -> 2.frozenset ==> {"RAND_STR"}
+  - Because python handles str as "iterable"
+  - can be also used like frozenset(["RAND_STR"])
+
+```py
+db_dsn = os.environ.get("WEBCRAWLER_DB_URL","")
+if db_dsn == '':
+        raise Exception(
+            "db_dsn failed to fetch. Please set your WEBCRAWLER_DB_URL")
+
+
+# is same as
+db_dsn = os.environ["WEBCRAWLER_DB_URL"]
+# automatically throw/raise exception if not set ==> cleaner
+
+```
+
+- selectolax -> HTML parser
 
 ## Docker
 
 - service name vs container name
   - exec for service name -> written in docker-compose file
 - docker-entrypoint-initdb.d directory for auto run sql command
+- "RUN" executes at **build time** (to install things into the image).
+- "CMD executes at **start time** (i.g) for -> uv run python3 -m webcrawler.worker_main
+- Build docker image
+
+  ```
+    docker build -t webcrawler .
+  ```
+
+- Check images
+  ```
+    docker images
+  ```
+- "docker image prune" for removing <none> tags
+- restart "always" -> long running daemon
+- restart "no" -> one shot job, such as seeder
+- docker-compose up --build -d
+  - build for rebuilding docker image
+- when updating the service name, make sure updating the host name as well - "HOST_NAME:PORT" breaks
 
 ## PSQL
 
@@ -78,3 +116,48 @@
 - CONFLICT ON
 - RETURNING id
 - create_pool -> borrow pool(acquire)
+- RESTART IDENTITY -> to restart ID, can be used with TRUNCATE
+
+## Redis
+
+- redis returns by bytes by default, "decode_responses=True" will return with UTF-8 str
+- redis-cli LRANGE <KEY_NAME> 0 -1
+  - LRANGE stands for list range, "0 -1" means from first to last elem
+- redis-cli SMEMBERS <KEY_NAME>
+  - SMEMBERS stands for set members
+
+## General
+
+- DSN: (Data Source Name) is a configuration string or data structure that contains the exact information required to connect to a database or data source
+
+# Commands for local testing
+
+- up the html(keep running)
+
+```
+uv run python3 http.server 8888
+```
+
+- make sure redis is fresh - even if you truncate psql, the same url won't work due to "seen" condition
+
+```
+docker-compose exec webcrawler-redis sh && redis-cli FLUSHALL
+```
+
+- make sure psql is also clean
+
+```
+docker-compose exec webcrawler-db psql -U <USER_NAME> -d <DB_NAME> -c "TRUNCATE tables, links RESTART IDENTITY "
+```
+
+- seed first
+
+```
+uv run python3 webcrawler.seeder http://localhost:8888/index.html
+```
+
+- run worker
+
+```
+uv run python3 -m webcrawler.worker_main
+```
