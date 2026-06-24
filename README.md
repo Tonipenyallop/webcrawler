@@ -216,6 +216,12 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
   ```
     docker-compose up -d --scale worker=N worker
   ```
+- add "image" if build shares same
+  ```
+    image: webcrawler:latest
+      <!-- ^ NAME -->
+                  <!-- ^ TAG -->
+  ```
 
 ## PSQL
 
@@ -236,6 +242,44 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
   - LRANGE stands for list range, "0 -1" means from first to last elem
 - redis-cli SMEMBERS <KEY_NAME>
   - SMEMBERS stands for set members
+
+## K8
+
+- pod, deployment, service
+- to apply yml file
+  - k apply -f FILE_PATH
+- to create yml file
+  - k create <configmap/secrets> NAME_TAG --from-literal=ENV_NAME=ENV_VAL --dry-run=client -o yaml > DIR/FILE_NAME
+- k exec -it deployment/postgres -- psql -U <USERNAME> -d <DB_NAME> -c "SQL_COMMAND"
+  - why deploy? -> because pods has random suffix and choosing deploy randomly picks the available pods which is much convenient
+
+### Pods
+
+- kubectl run redis --image=redis:8.8-alpine # create a Pod named "redis"
+- kubectl get pods # is it running? (watch STATUS go ContainerCreating → Running)
+- kubectl get pods -o wide # + which node / IP
+- kubectl describe pod redis # full detail: events, image, why-pending if stuck
+- kubectl logs redis # the container's stdout (like docker logs)
+- kubectl exec -it redis -- redis-cli ping # run a command inside it → expect "PONG"
+
+### Deployment
+
+- kubectl create deployment redis --image=redis:8.8-alpine --dry-run=client -o yaml > redis-deploy.yml
+- kubectl apply -f redis-deploy.yaml # create/update from the file (idempotent — re-apply anytime)
+- kubectl get deployments # the Deployment + how many replicas ready
+- kubectl get replicasets # the ReplicaSet it created
+- kubectl get pods # the actual pods (note the auto-generated names)
+- kubectl delete pod <that-pod-name> # kill it
+- kubectl scale deployment redis --replicas=N
+
+### Service
+
+- Creates a ClusterIP Service "redis" → the deployment's pods(Imperative)
+  - kubectl expose deployment redis --port=6379
+
+- Declarative (best practice — generate then apply):
+  - kubectl expose deployment redis --port=6379 --dry-run=client -o yaml > redis-svc.yaml
+  - kubectl apply -f redis-svc.yaml
 
 ## General
 
