@@ -2,6 +2,7 @@ apiVersion: v1
 data:
   WEBCRAWLER_ALLOWED_DOMAINS: fixture-site
   WEBCRAWLER_MAX_DEPTH: "50"
+  WEBCRAWLER_REDIS_URL: redis://redis:6379
 kind: ConfigMap
 metadata:
   creationTimestamp: null
