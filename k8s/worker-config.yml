@@ -6,4 +6,4 @@ data:
 kind: ConfigMap
 metadata:
   creationTimestamp: null
-  name: crawler-config
+  name: worker-config
