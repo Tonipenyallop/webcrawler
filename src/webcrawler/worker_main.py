@@ -31,7 +31,7 @@ async def main():
 
     while True:
         if not await worker.run_once():
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(10.0)
 
 
 if __name__ == "__main__":
