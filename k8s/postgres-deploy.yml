@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: postgres
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - image: postgres:18.4-alpine
+          name: postgres
+          resources: {}
+          envFrom:
+            - secretRef:
+                name: db-secret
+            - configMapRef:
+                name: db-config
+          volumeMounts:
+            - name: schema
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: schema
+          configMap:
+            name: db-schema
+
+status: {}
