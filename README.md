@@ -105,6 +105,12 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
 - docker-compose up --build -d
   - build for rebuilding docker image
 - when updating the service name, make sure updating the host name as well - "HOST_NAME:PORT" breaks
+- every service needs an image to run, and a service gets its image one of two ways:
+  build: use image built by dockerfile, image: pull from repository
+- scale up command
+  ```
+    docker-compose up -d --scale worker=N worker
+  ```
 
 ## PSQL
 
@@ -129,6 +135,7 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
 ## General
 
 - DSN: (Data Source Name) is a configuration string or data structure that contains the exact information required to connect to a database or data source
+- zshrc > .env => reading env var issue
 
 # Commands for local testing
 
@@ -160,4 +167,10 @@ uv run python3 webcrawler.seeder http://localhost:8888/index.html
 
 ```
 uv run python3 -m webcrawler.worker_main
+```
+
+- use local env file if needed
+
+```
+  uv run --env-file python3 ...
 ```
