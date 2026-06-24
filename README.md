@@ -1,5 +1,110 @@
 # webcrawler
 
+A distributed web crawler: stateless worker processes share a Redis frontier and
+crawl every reachable in-domain page **exactly once**, persisting results to
+PostgreSQL. Designed to scale horizontally — run 1 worker or 100, the result is
+identical; only throughput changes.
+
+## Architecture
+
+```
+                     ┌──────────┐
+   seed URLs ───────▶│  Seeder  │  one-shot CLI: SADD seen + RPUSH frontier
+                     └────┬─────┘
+                          │
+                          ▼
+                   ┌──────────────┐      LPOP        ┌────────────────┐
+                   │    Redis     │◀────────────────▶│  Worker × N    │  stateless,
+                   │  frontier    │   atomic SADD    │  run_once()    │  scalable
+                   │  (LIST/queue)│   (dedup gate)   │  fetch→parse   │
+                   │  seen (SET)  │─────────────────▶│  →filter→enq   │
+                   └──────────────┘                  └───────┬────────┘
+                                                             │ save_page / save_links
+                                                             ▼
+                                                     ┌────────────────┐
+                                                     │  PostgreSQL    │
+                                                     │  pages, links  │
+                                                     └────────────────┘
+```
+
+**Data flow for one URL:** worker `LPOP`s `[url, depth]` from the frontier → fetches
+it (httpx) → saves the page (upsert) → if it's `text/html`, parses links
+(selectolax) → keeps only in-domain links within depth → for each, an **atomic
+`SADD`** to `seen` decides whether it's new; if so, `RPUSH` onto the frontier. Repeat
+until the frontier drains.
+
+## Design decisions
+
+- **Redis is the only shared state.** The frontier (queue) and `seen` (dedup set)
+  live in Redis; workers hold no state. That's what makes workers **stateless and
+  horizontally scalable** — `docker compose up --scale worker=N` just works, because
+  there's nothing to coordinate beyond Redis.
+
+- **Atomic `SADD` for dedup (the core decision).** When N workers discover the same
+  URL concurrently, they all try to enqueue it. `SADD` is atomic: exactly one call
+  returns "newly added"; the rest get "already present" and skip. This prevents the
+  enqueue race and guarantees **each URL is crawled exactly once**, no locks needed.
+  Postgres `UNIQUE(url)` is a second-layer backstop.
+
+- **Frontier = `LIST` + `SET`.** A Redis `LIST` gives FIFO order (BFS) via
+  `RPUSH`/`LPOP`; a `SET` gives O(1) membership for dedup. Two structures, two jobs:
+  the list is the transient _to-do queue_, the set is the permanent _memory_.
+
+- **`run_once()` vs `run()`.** `run_once()` processes a single URL and returns
+  whether there was work — the reusable unit. `run()` loops it for batch/tests;
+  the daemon (`worker_main`) loops it and **sleeps on an empty frontier instead of
+  exiting**, because empty ≠ done in a distributed crawl.
+
+- **Content-type guard.** Every fetched page is saved, but only `text/html`
+  responses are parsed for links — you can't (and shouldn't) extract `<a href>`
+  from a PDF or JSON.
+
+- **Config from the environment (12-factor).** The same image runs anywhere; URLs,
+  domains, and limits come from env vars (`WEBCRAWLER_*`) injected by compose.
+
+- **Stack:** httpx (async fetch), selectolax (fast C-based HTML parsing, picked
+  over BeautifulSoup for speed), asyncpg (async Postgres + connection pool),
+  Redis, packaged with uv and orchestrated by docker-compose.
+
+## Running it (Docker)
+
+```bash
+docker-compose up --build -d
+
+# host a website
+docker-compose run --rm fixture-site
+
+# enqueue seed(s)
+SEEDS="http://fixture-site/p0" docker-compose run --rm seeder
+
+# scale out
+docker-compose up -d --scale worker=6 worker
+
+# inspect
+docker-compose exec db psql -U TONI -d webcrawler -c "SELECT count(*) FROM pages"
+docker-compose exec redis redis-cli SCARD seen
+```
+
+Config is env-driven (see `.env` / compose `environment:`): `WEBCRAWLER_DB_URL`,
+`WEBCRAWLER_REDIS_URL`, `WEBCRAWLER_ALLOWED_DOMAINS`, `WEBCRAWLER_MAX_DEPTH`,
+`WEBCRAWLER_MAX_PAGES`. Inside the compose network, services reach each other by
+**service name** (`db:5432`, `redis:6379`) — not `localhost`.
+
+## Scale demo (proving stateless dedup)
+
+`scripts/gen_bigsite.py` generates 40 interlinked pages (`tests/fixtures/bigsite/`),
+served by a `fixture-site` container. Seed `p0`, scale to 6 workers, and the result
+is **40 pages, 0 duplicates** — identical at scale=1 or scale=6. Scaling changes
+speed, never correctness.
+
+## Tests
+
+```bash
+uv run pytest
+```
+
+---
+
 # learnt
 
 ## Python
@@ -148,13 +253,13 @@ uv run python3 http.server 8888
 - make sure redis is fresh - even if you truncate psql, the same url won't work due to "seen" condition
 
 ```
-docker-compose exec webcrawler-redis sh && redis-cli FLUSHALL
+docker-compose exec redis sh && redis-cli FLUSHALL
 ```
 
 - make sure psql is also clean
 
 ```
-docker-compose exec webcrawler-db psql -U <USER_NAME> -d <DB_NAME> -c "TRUNCATE tables, links RESTART IDENTITY "
+docker-compose exec db psql -U <USER_NAME> -d <DB_NAME> -c "TRUNCATE tables, links RESTART IDENTITY "
 ```
 
 - seed first
