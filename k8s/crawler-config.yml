@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  WEBCRAWLER_ALLOWED_DOMAINS: fixture-site
+  WEBCRAWLER_MAX_DEPTH: "50"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: crawler-config
