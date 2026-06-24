@@ -28,6 +28,7 @@ services:
 
   worker:
     build: .
+    image: webcrawler:latest
     restart: always
     depends_on:
       - "db"
@@ -40,6 +41,7 @@ services:
 
   seeder:
     build: .
+    image: webcrawler:latest
     restart: "no"
     depends_on:
       - "redis"
@@ -50,6 +52,7 @@ services:
 
   fixture-site:
     build: .
+    image: webcrawler:latest
     restart: "always"
     working_dir: /bigsite
     volumes:
