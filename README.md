@@ -243,7 +243,7 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
 - redis-cli SMEMBERS <KEY_NAME>
   - SMEMBERS stands for set members
 
-## K8
+## K8s
 
 - pod, deployment, service
 - to apply yml file
@@ -252,6 +252,28 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
   - k create <configmap/secrets> NAME_TAG --from-literal=ENV_NAME=ENV_VAL --dry-run=client -o yaml > DIR/FILE_NAME
 - k exec -it deployment/postgres -- psql -U <USERNAME> -d <DB_NAME> -c "SQL_COMMAND"
   - why deploy? -> because pods has random suffix and choosing deploy randomly picks the available pods which is much convenient
+- volumeMounts -> where to put
+- volumes -> where to get
+
+```
+ This is a third distinct "stuck" state worth filing away:
+
+  ┌──────────────────────────────┬─────────────────────────────────┬─────────────────────────────────────────────┐
+  │            Status            │              Means              │                    Cause                    │
+  ├──────────────────────────────┼─────────────────────────────────┼─────────────────────────────────────────────┤
+  │ ImagePullBackOff             │ can't get the image             │ tag / pull-policy                           │
+  ├──────────────────────────────┼─────────────────────────────────┼─────────────────────────────────────────────┤
+  │ CrashLoopBackOff             │ image ran, app died             │ env / code                                  │
+  ├──────────────────────────────┼─────────────────────────────────┼─────────────────────────────────────────────┤
+  │ ContainerCreating +          │ waiting on a volume's backing   │ a referenced ConfigMap/Secret/PVC doesn't   │
+  │ FailedMount                  │ object                          │ exist                                       │
+  └──────────────────────────────┴─────────────────────────────────┴─────────────────────────────────────────────┘
+```
+
+- Deployment = "keep it running forever" (redis, postgres, worker)
+- Job = "run it once, to completion" (seeder)
+- anything about a specific container (its image, env, mounts, pull policy) goes in the container
+- anything about the pod as a whole (restart policy, the shared volumes) goes at pod level
 
 ### Pods
 
@@ -322,4 +344,23 @@ uv run python3 -m webcrawler.worker_main
 
 ```
   uv run --env-file python3 ...
+```
+
+# Commands for K8s
+
+```
+  k apply -f k8s/ # start everything
+
+  k delete jobs seeder # to kill seeder
+
+  k exec -it deployments/redis -- sh # in the shell and run "FLUSHALL", "LRANGE","SMEMBERS" to check
+  k exec -it deployments/postgres -- psql -U <username> -d <dbname> -c "QUERY_HERE" # for running query for "pages" and/or "links"
+
+
+  k scale deployments/worker --replicas=6 # increase the worker pods
+
+  k apply -f k8s/seeder # seeds and worker will pull it and resolves it
+
+  k delete -f k8s/ # for clean up except configmap, secrets
+
 ```
