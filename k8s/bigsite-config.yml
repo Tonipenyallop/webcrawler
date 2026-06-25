@@ -1,0 +1,246 @@
+apiVersion: v1
+data:
+  p0.html: |
+    <html><body>
+    <a href="p1.html">page 1</a>
+    <a href="p3.html">page 3</a>
+    <a href="p7.html">page 7</a>
+    </body></html>
+  p1.html: |
+    <html><body>
+    <a href="p2.html">page 2</a>
+    <a href="p4.html">page 4</a>
+    <a href="p8.html">page 8</a>
+    </body></html>
+  p2.html: |
+    <html><body>
+    <a href="p3.html">page 3</a>
+    <a href="p5.html">page 5</a>
+    <a href="p9.html">page 9</a>
+    </body></html>
+  p3.html: |
+    <html><body>
+    <a href="p4.html">page 4</a>
+    <a href="p6.html">page 6</a>
+    <a href="p10.html">page 10</a>
+    </body></html>
+  p4.html: |
+    <html><body>
+    <a href="p5.html">page 5</a>
+    <a href="p7.html">page 7</a>
+    <a href="p11.html">page 11</a>
+    </body></html>
+  p5.html: |
+    <html><body>
+    <a href="p6.html">page 6</a>
+    <a href="p8.html">page 8</a>
+    <a href="p12.html">page 12</a>
+    </body></html>
+  p6.html: |
+    <html><body>
+    <a href="p7.html">page 7</a>
+    <a href="p9.html">page 9</a>
+    <a href="p13.html">page 13</a>
+    </body></html>
+  p7.html: |
+    <html><body>
+    <a href="p8.html">page 8</a>
+    <a href="p10.html">page 10</a>
+    <a href="p14.html">page 14</a>
+    </body></html>
+  p8.html: |
+    <html><body>
+    <a href="p9.html">page 9</a>
+    <a href="p11.html">page 11</a>
+    <a href="p15.html">page 15</a>
+    </body></html>
+  p9.html: |
+    <html><body>
+    <a href="p10.html">page 10</a>
+    <a href="p12.html">page 12</a>
+    <a href="p16.html">page 16</a>
+    </body></html>
+  p10.html: |
+    <html><body>
+    <a href="p11.html">page 11</a>
+    <a href="p13.html">page 13</a>
+    <a href="p17.html">page 17</a>
+    </body></html>
+  p11.html: |
+    <html><body>
+    <a href="p12.html">page 12</a>
+    <a href="p14.html">page 14</a>
+    <a href="p18.html">page 18</a>
+    </body></html>
+  p12.html: |
+    <html><body>
+    <a href="p13.html">page 13</a>
+    <a href="p15.html">page 15</a>
+    <a href="p19.html">page 19</a>
+    </body></html>
+  p13.html: |
+    <html><body>
+    <a href="p14.html">page 14</a>
+    <a href="p16.html">page 16</a>
+    <a href="p20.html">page 20</a>
+    </body></html>
+  p14.html: |
+    <html><body>
+    <a href="p15.html">page 15</a>
+    <a href="p17.html">page 17</a>
+    <a href="p21.html">page 21</a>
+    </body></html>
+  p15.html: |
+    <html><body>
+    <a href="p16.html">page 16</a>
+    <a href="p18.html">page 18</a>
+    <a href="p22.html">page 22</a>
+    </body></html>
+  p16.html: |
+    <html><body>
+    <a href="p17.html">page 17</a>
+    <a href="p19.html">page 19</a>
+    <a href="p23.html">page 23</a>
+    </body></html>
+  p17.html: |
+    <html><body>
+    <a href="p18.html">page 18</a>
+    <a href="p20.html">page 20</a>
+    <a href="p24.html">page 24</a>
+    </body></html>
+  p18.html: |
+    <html><body>
+    <a href="p19.html">page 19</a>
+    <a href="p21.html">page 21</a>
+    <a href="p25.html">page 25</a>
+    </body></html>
+  p19.html: |
+    <html><body>
+    <a href="p20.html">page 20</a>
+    <a href="p22.html">page 22</a>
+    <a href="p26.html">page 26</a>
+    </body></html>
+  p20.html: |
+    <html><body>
+    <a href="p21.html">page 21</a>
+    <a href="p23.html">page 23</a>
+    <a href="p27.html">page 27</a>
+    </body></html>
+  p21.html: |
+    <html><body>
+    <a href="p22.html">page 22</a>
+    <a href="p24.html">page 24</a>
+    <a href="p28.html">page 28</a>
+    </body></html>
+  p22.html: |
+    <html><body>
+    <a href="p23.html">page 23</a>
+    <a href="p25.html">page 25</a>
+    <a href="p29.html">page 29</a>
+    </body></html>
+  p23.html: |
+    <html><body>
+    <a href="p24.html">page 24</a>
+    <a href="p26.html">page 26</a>
+    <a href="p30.html">page 30</a>
+    </body></html>
+  p24.html: |
+    <html><body>
+    <a href="p25.html">page 25</a>
+    <a href="p27.html">page 27</a>
+    <a href="p31.html">page 31</a>
+    </body></html>
+  p25.html: |
+    <html><body>
+    <a href="p26.html">page 26</a>
+    <a href="p28.html">page 28</a>
+    <a href="p32.html">page 32</a>
+    </body></html>
+  p26.html: |
+    <html><body>
+    <a href="p27.html">page 27</a>
+    <a href="p29.html">page 29</a>
+    <a href="p33.html">page 33</a>
+    </body></html>
+  p27.html: |
+    <html><body>
+    <a href="p28.html">page 28</a>
+    <a href="p30.html">page 30</a>
+    <a href="p34.html">page 34</a>
+    </body></html>
+  p28.html: |
+    <html><body>
+    <a href="p29.html">page 29</a>
+    <a href="p31.html">page 31</a>
+    <a href="p35.html">page 35</a>
+    </body></html>
+  p29.html: |
+    <html><body>
+    <a href="p30.html">page 30</a>
+    <a href="p32.html">page 32</a>
+    <a href="p36.html">page 36</a>
+    </body></html>
+  p30.html: |
+    <html><body>
+    <a href="p31.html">page 31</a>
+    <a href="p33.html">page 33</a>
+    <a href="p37.html">page 37</a>
+    </body></html>
+  p31.html: |
+    <html><body>
+    <a href="p32.html">page 32</a>
+    <a href="p34.html">page 34</a>
+    <a href="p38.html">page 38</a>
+    </body></html>
+  p32.html: |
+    <html><body>
+    <a href="p33.html">page 33</a>
+    <a href="p35.html">page 35</a>
+    <a href="p39.html">page 39</a>
+    </body></html>
+  p33.html: |
+    <html><body>
+    <a href="p34.html">page 34</a>
+    <a href="p36.html">page 36</a>
+    <a href="p0.html">page 0</a>
+    </body></html>
+  p34.html: |
+    <html><body>
+    <a href="p35.html">page 35</a>
+    <a href="p37.html">page 37</a>
+    <a href="p1.html">page 1</a>
+    </body></html>
+  p35.html: |
+    <html><body>
+    <a href="p36.html">page 36</a>
+    <a href="p38.html">page 38</a>
+    <a href="p2.html">page 2</a>
+    </body></html>
+  p36.html: |
+    <html><body>
+    <a href="p37.html">page 37</a>
+    <a href="p39.html">page 39</a>
+    <a href="p3.html">page 3</a>
+    </body></html>
+  p37.html: |
+    <html><body>
+    <a href="p38.html">page 38</a>
+    <a href="p0.html">page 0</a>
+    <a href="p4.html">page 4</a>
+    </body></html>
+  p38.html: |
+    <html><body>
+    <a href="p39.html">page 39</a>
+    <a href="p1.html">page 1</a>
+    <a href="p5.html">page 5</a>
+    </body></html>
+  p39.html: |
+    <html><body>
+    <a href="p0.html">page 0</a>
+    <a href="p2.html">page 2</a>
+    <a href="p6.html">page 6</a>
+    </body></html>
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: bigsite-config
