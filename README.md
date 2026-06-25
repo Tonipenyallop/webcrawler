@@ -66,7 +66,37 @@ until the frontier drains.
   over BeautifulSoup for speed), asyncpg (async Postgres + connection pool),
   Redis, packaged with uv and orchestrated by docker-compose.
 
-## Running it (Docker)
+## Running with K8s
+
+### IMPORTANT NODE
+
+- **Please fill out "k8s/db-secret-example.yml" or generate your secret yml file first**
+- I am using **docker-desktop** for the cluster. You can also use minikube to use it if you wish
+  ```
+    k config current-context
+  ```
+
+```
+k apply -f k8s/
+
+# To reset redis
+k exec -it deployment/redis -- sh && redis-cli FLUSHALL
+
+# To re-seed
+k delete job/seeder
+k apply -f k8s/seeder.yml
+
+# To check sql db
+
+k exec -it deployment/postgres -- psql -U <USER_NAME> -d <DB_NAME> -c "SQL_COMMAND_HERE_MATE!"
+
+# Scale worker up
+
+k scale deployment/worker --replicas=N
+
+```
+
+## Running with Docker
 
 ```bash
 docker-compose up --build -d
@@ -275,6 +305,34 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
 - anything about a specific container (its image, env, mounts, pull policy) goes in the container
 - anything about the pod as a whole (restart policy, the shared volumes) goes at pod level
 
+- docker compose to k8s conversion cheat sheet
+
+```
+  ┌──────────────────────────┬────────────────────────────┐
+  │         compose          │           → k8s            │
+  ├──────────────────────────┼────────────────────────────┤
+  │ a service (long-running) │ Deployment                 │
+  ├──────────────────────────┼────────────────────────────┤
+  │ a service (restart:"no") │ Job                        │
+  ├──────────────────────────┼────────────────────────────┤
+  │ ports: (others reach it) │ Service                    │
+  ├──────────────────────────┼────────────────────────────┤
+  │ environment:             │ ConfigMap                  │
+  ├──────────────────────────┼────────────────────────────┤
+  │ .env/secrets             │ Secret                     │
+  ├──────────────────────────┼────────────────────────────┤
+  │ named volume             │ PVC                        │
+  ├──────────────────────────┼────────────────────────────┤
+  │ bind-mount a file        │ ConfigMap/Secret as volume │
+  └──────────────────────────┴────────────────────────────┘
+```
+
+- explain is extremely powerful tool
+
+```
+  k explain deployment.spec
+```
+
 ### Pods
 
 - kubectl run redis --image=redis:8.8-alpine # create a Pod named "redis"
@@ -302,6 +360,16 @@ db_dsn = os.environ["WEBCRAWLER_DB_URL"]
 - Declarative (best practice — generate then apply):
   - kubectl expose deployment redis --port=6379 --dry-run=client -o yaml > redis-svc.yaml
   - kubectl apply -f redis-svc.yaml
+
+## Secrets
+
+- data -> encoded base64 vals
+- stringData -> plain text
+
+## YAML
+
+- "-" means list of items
+- "no dash" means the key-value of the parent
 
 ## General
 
