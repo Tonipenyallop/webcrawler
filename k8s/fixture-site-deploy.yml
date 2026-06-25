@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: fixture-site
+  name: fixture-site
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fixture-site
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: fixture-site
+    spec:
+      containers:
+        - image: nginx:alpine
+          name: nginx
+          resources: {}
+          volumeMounts:
+            - name: site
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: site
+          configMap:
+            name: bigsite-config
+
+status: {}
