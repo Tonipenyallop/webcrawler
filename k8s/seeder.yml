@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  creationTimestamp: null
+  name: seeder
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+        - command:
+            - uv
+            - run
+            - python3
+            - -m
+            - webcrawler.seeder
+            - http://fixture-site/p0.html
+          image: webcrawler:1.0
+          name: seeder
+          resources: {}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: crawler-config
+      restartPolicy: Never
+
+status: {}
